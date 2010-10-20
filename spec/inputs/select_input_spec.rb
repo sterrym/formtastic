@@ -32,6 +32,41 @@ describe 'select input' do
       end
     end
 
+    describe 'using a grouped array of values' do
+      before do
+        @grouped_array_with_values = [["Author A", ["Title A", "Title B", "Title C"]], ["Author B", ["Title D", "Title E", "Title F"]]]
+        @grouped_array_with_keys_and_values = [["Author A", [["Title A", 1], ["Title B", 2], ["Title C", 3]]], ["Author B", [["Title D", 4], ["Title E", 5], ["Title F", 5]]]]
+        @form = semantic_form_for(@new_post) do |builder|
+          concat(builder.input(:title, :as => :select, :collection => @grouped_array_with_values, :group_collection => true))
+          concat(builder.input(:title, :as => :select, :collection => @grouped_array_with_keys_and_values, :group_collection => true))
+        end
+      end
+
+      it 'should have an optgroup for each key' do
+        output_buffer.concat(@form) if Formtastic::Util.rails3?
+        @grouped_array_with_values.each do |v|
+          output_buffer.should have_tag("form li select optgroup[@label='#{v.first}']")
+        end
+        @grouped_array_with_keys_and_values.each do |v|
+          output_buffer.should have_tag("form li select optgroup[@label='#{v.first}']")
+        end
+      end
+
+      it 'should have an option for each key and/or value' do
+        output_buffer.concat(@form) if Formtastic::Util.rails3?
+        @grouped_array_with_values.each do |group_array|
+          group_array.last.each do |v|
+            output_buffer.should have_tag("form li select option[@value='#{v}']", /^#{v}$/)
+          end
+        end
+        @grouped_array_with_keys_and_values.each do |group_array|
+          group_array.last.each do |v|
+            output_buffer.should have_tag("form li select option[@value='#{v.second}']", /^#{v.first}$/)
+          end
+        end
+      end
+    end
+
     describe 'using a range' do
       before do
         @range_with_values = 1..5
