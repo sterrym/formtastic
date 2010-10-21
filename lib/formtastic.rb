@@ -816,7 +816,7 @@ module Formtastic #:nodoc:
                                          strip_formtastic_options(options), html_options)
         else
           collection = find_collection_for_column(method, options)
-          collection = template.grouped_options_for_select(collection).html_safe if options[:group_collection]
+          collection = template.grouped_options_for_select(collection, object[method]).html_safe if options[:group_collection]
 
           self.select(input_name, collection, strip_formtastic_options(options), html_options)
         end
